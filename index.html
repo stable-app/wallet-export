@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Stable — Recovery key</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+    background: #FFFFFF; color: #14181D;
+    display: flex; min-height: 100dvh; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .card { width: 100%; max-width: 360px; text-align: center; }
+  .brand { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: #696D77; font-weight: 600; }
+  h1 { font-size: 24px; letter-spacing: -0.03em; margin: 10px 0 8px; }
+  p { font-size: 14px; line-height: 1.5; color: #4B4F55; }
+  .warn { font-size: 12.5px; color: #696D77; margin-top: 14px; }
+  button {
+    margin-top: 24px; width: 100%; padding: 17px 0; border: 0; border-radius: 22px;
+    background: #14181D; color: #fff; font-size: 17px; font-weight: 600;
+    letter-spacing: -0.02em; cursor: pointer;
+  }
+  button:disabled { opacity: 0.4; }
+  .status { margin-top: 14px; font-size: 13px; color: #696D77; min-height: 18px; }
+  .ok { color: #1F5841; }
+  .err { color: #C24A3D; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">Stable</div>
+  <h1 id="title">Recovery key</h1>
+  <p id="desc">Sign in with the same email you use in Stable, then reveal your
+  wallet's private key. The key appears in Privy's secure window — Stable
+  never sees it.</p>
+  <button id="cta" disabled>Loading…</button>
+  <div class="status" id="status"></div>
+  <p class="warn">Never share your recovery key. Anyone who has it can spend
+  your money. Stable will never ask for it.</p>
+</div>
+<script type="module">
+  import React from "https://esm.sh/react@18.3.1";
+  import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
+  import { PrivyProvider, usePrivy } from "https://esm.sh/@privy-io/react-auth@2?deps=react@18.3.1,react-dom@18.3.1";
+  import { useExportWallet } from "https://esm.sh/@privy-io/react-auth@2/solana?deps=react@18.3.1,react-dom@18.3.1";
+
+  const h = React.createElement;
+  const cta = document.getElementById("cta");
+  const statusEl = document.getElementById("status");
+  const desc = document.getElementById("desc");
+
+  function App() {
+    const { ready, authenticated, login, user } = usePrivy();
+    const { exportWallet } = useExportWallet();
+
+    React.useEffect(() => {
+      if (!ready) return;
+      cta.disabled = false;
+      if (!authenticated) {
+        cta.textContent = "Sign in";
+        cta.onclick = () => login();
+      } else {
+        const email = user?.email?.address ?? "";
+        desc.textContent = email
+          ? "Signed in as " + email + ". Reveal opens Privy's secure window."
+          : "Reveal opens Privy's secure window.";
+        cta.textContent = "Reveal my key";
+        cta.onclick = async () => {
+          statusEl.textContent = "";
+          try {
+            await exportWallet();
+            statusEl.textContent = "Done — you can close this page.";
+            statusEl.className = "status ok";
+          } catch (e) {
+            statusEl.textContent = "Couldn't reveal the key. Try again.";
+            statusEl.className = "status err";
+          }
+        };
+      }
+    }, [ready, authenticated, user]);
+
+    return h(React.Fragment);
+  }
+
+  createRoot(document.createElement("div")).render(
+    h(PrivyProvider, { appId: "cmrmljdzy000l0cjvz7n3uyhc", config: { loginMethods: ["email"] } }, h(App))
+  );
+</script>
+</body>
+</html>
