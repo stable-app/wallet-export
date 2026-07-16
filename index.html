@@ -36,6 +36,10 @@
   .ok { color: #1F5841; }
   .err { color: #C24A3D; }
   .warn { font-size: 12.5px; color: #696D77; margin-top: 18px; line-height: 1.5; }
+  .legend { margin-top: 18px; text-align: left; background: #F0F1F5; border-radius: 14px; padding: 14px 16px; }
+  .legend p { font-size: 13px; line-height: 1.5; color: #4B4F55; }
+  .legend p + p { margin-top: 8px; }
+  .legend b { color: #14181D; font-weight: 600; }
   .link { margin-top: 12px; background: none; border: none; color: #696D77; font-size: 13px; text-decoration: underline; width: auto; padding: 4px; }
 </style>
 </head>
@@ -72,9 +76,10 @@
     if (authenticated) {
       const addr = user?.email?.address ?? email;
       return h(React.Fragment, null,
-        h("p", { className: "desc" },
-          (addr ? `Signed in as ${addr}. ` : "") +
-          "Your key reveals in Privy's secure window — Stable never sees it."),
+        h("p", { className: "desc" }, addr ? `Signed in as ${addr}.` : "Signed in."),
+        h("div", { className: "legend" },
+          h("p", null, h("b", null, "\u201cCopy key\u201d"), " (green) copies your private key \u2014 the secret. That\u2019s the one to save."),
+          h("p", null, h("b", null, "\u201cYour wallet\u201d"), " is just your address \u2014 safe to share, not your key.")),
         h("button", {
           className: "reveal",
           disabled: busy,
@@ -87,7 +92,7 @@
               setStatus(["Couldn't reveal: " + String(e?.message ?? e).slice(0, 140), "err"]);
             } finally { setBusy(false); }
           },
-        }, busy ? "Opening…" : "Reveal my key"),
+        }, busy ? "Opening…" : "Reveal private key"),
         h("div", { className: "status " + status[1] }, status[0]),
         h("button", {
           className: "link",
