@@ -72,10 +72,10 @@
           statusEl.textContent = "";
           try {
             await exportWallet();
-            statusEl.textContent = "Done — you can close this page.";
+            statusEl.textContent = "Done — you can close this page."; try { window.ReactNativeWebView?.postMessage(JSON.stringify({status:"success"})) } catch {}
             statusEl.className = "status ok";
           } catch (e) {
-            statusEl.textContent = "Couldn't reveal the key. Try again.";
+            statusEl.textContent = "Couldn't reveal: " + String(e?.message ?? e).slice(0, 140);
             statusEl.className = "status err";
           }
         };
