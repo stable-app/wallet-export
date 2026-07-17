@@ -41,6 +41,13 @@
   .legend p + p { margin-top: 8px; }
   .legend b { color: #14181D; font-weight: 600; }
   .link { margin-top: 12px; background: none; border: none; color: #696D77; font-size: 13px; text-decoration: underline; width: auto; padding: 4px; }
+  .sub { margin-top: 26px; padding-top: 20px; border-top: 1px solid rgba(20,24,29,0.08); text-align: left; }
+  .subhead { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+  .subdesc { font-size: 12.5px; line-height: 1.5; color: #696D77; margin-top: 4px; }
+  button.ghost {
+    margin-top: 12px; background: #FFFFFF; color: #14181D;
+    border: 1px solid rgba(20,24,29,0.16); padding: 13px 0; font-size: 15px; border-radius: 18px;
+  }
 </style>
 </head>
 <body>
@@ -52,10 +59,20 @@
 <script type="module">
   import React from "https://esm.sh/react@18.3.1";
   import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-  import { PrivyProvider, usePrivy, useLoginWithEmail } from "https://esm.sh/@privy-io/react-auth@2?deps=react@18.3.1,react-dom@18.3.1";
-  import { useExportWallet } from "https://esm.sh/@privy-io/react-auth@2/solana?deps=react@18.3.1,react-dom@18.3.1";
+  // PINNED — an unpinned @2 drifts with esm.sh rebuilds.
+  import { PrivyProvider, usePrivy, useLoginWithEmail, useExportWallet as useExportEvmWallet } from "https://esm.sh/@privy-io/react-auth@2.25.0?deps=react@18.3.1,react-dom@18.3.1";
+  import { useExportWallet } from "https://esm.sh/@privy-io/react-auth@2.25.0/solana?deps=react@18.3.1,react-dom@18.3.1";
 
   const h = React.createElement;
+
+  /** The user's embedded wallet on a chain, or null. */
+  const embeddedWallet = (user, chainType) =>
+    (user?.linkedAccounts ?? []).find(
+      (a) =>
+        a.type === "wallet" &&
+        a.chainType === chainType &&
+        (a.walletClientType === "privy" || a.connectorType === "embedded")
+    ) ?? null;
 
   // Headless email login — OUR fields, no Privy modal. (Privy's prebuilt
   // dialog loses its CSS through CDN bundling; the broken layout stacked the
@@ -64,9 +81,14 @@
     const { ready, authenticated, user, logout } = usePrivy();
     const { sendCode, loginWithCode } = useLoginWithEmail();
     const { exportWallet } = useExportWallet();
+    const { exportWallet: exportEvmWallet } = useExportEvmWallet();
 
     const [stage, setStage] = React.useState("email"); // email | code
-    const [email, setEmail] = React.useState("");
+    // The app deep-links here with ?email= so people land on THEIR account
+    // (a typo'd or outdated email signs into a fresh, walletless one).
+    const [email, setEmail] = React.useState(
+      () => new URLSearchParams(location.search).get("email") ?? ""
+    );
     const [code, setCode] = React.useState("");
     const [busy, setBusy] = React.useState(false);
     const [status, setStatus] = React.useState(["", ""]); // [text, class]
@@ -75,6 +97,26 @@
 
     if (authenticated) {
       const addr = user?.email?.address ?? email;
+      const solWallet = embeddedWallet(user, "solana");
+      const evmWallet = embeddedWallet(user, "ethereum");
+
+      // Signed into an account with no Stable wallet — almost always a
+      // typo'd or outdated email. Say so plainly instead of failing at the
+      // last step with a cryptic library error.
+      if (!solWallet) {
+        return h(React.Fragment, null,
+          h("p", { className: "desc" }, `Signed in as ${addr}.`),
+          h("div", { className: "legend" },
+            h("p", null, h("b", null, "This email isn’t connected to a Stable wallet."), " Your money is safe — it lives under the email you use in the Stable app."),
+            h("p", null, "Check Settings → Personal info in Stable for the exact email, then sign in here with that one.")),
+          h("button", {
+            onClick: () => logout().then(() => { setStage("email"); setCode(""); setStatus(["", ""]); }),
+          }, "Try a different email"),
+          h("p", { className: "warn" },
+            "Never share your recovery key. Anyone who has it can spend your money. Stable will never ask for it.")
+        );
+      }
+
       return h(React.Fragment, null,
         h("p", { className: "desc" }, addr ? `Signed in as ${addr}.` : "Signed in."),
         h("div", { className: "legend" },
@@ -86,7 +128,7 @@
           onClick: async () => {
             setBusy(true); setStatus(["", ""]);
             try {
-              await exportWallet();
+              await exportWallet({ address: solWallet.address });
               setStatus(["Done — you can close this page.", "ok"]);
             } catch (e) {
               setStatus(["Couldn't reveal: " + String(e?.message ?? e).slice(0, 140), "err"]);
@@ -94,6 +136,28 @@
           },
         }, busy ? "Opening…" : "Reveal private key"),
         h("div", { className: "status " + status[1] }, status[0]),
+        // Deposit-address key (Ethereum-style networks) — a doorway wallet
+        // that normally holds nothing; the section exists only for users who
+        // have one, so today's Solana-only accounts see no change.
+        evmWallet
+          ? h("div", { className: "sub" },
+              h("p", { className: "subhead" }, "Deposit address key"),
+              h("p", { className: "subdesc" },
+                "Only needed to recover funds stuck on an Ethereum-style network (Base, Ethereum, Arbitrum…). Your balance doesn’t live there."),
+              h("button", {
+                className: "ghost",
+                disabled: busy,
+                onClick: async () => {
+                  setBusy(true); setStatus(["", ""]);
+                  try {
+                    await exportEvmWallet({ address: evmWallet.address });
+                    setStatus(["Done — you can close this page.", "ok"]);
+                  } catch (e) {
+                    setStatus(["Couldn't reveal: " + String(e?.message ?? e).slice(0, 140), "err"]);
+                  } finally { setBusy(false); }
+                },
+              }, "Reveal deposit key"))
+          : null,
         h("button", {
           className: "link",
           onClick: () => logout().then(() => { setStage("email"); setCode(""); setStatus(["", ""]); }),
