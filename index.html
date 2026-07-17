@@ -60,7 +60,7 @@
   import React from "https://esm.sh/react@18.3.1";
   import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
   // PINNED — an unpinned @2 drifts with esm.sh rebuilds.
-  import { PrivyProvider, usePrivy, useLoginWithEmail, useExportWallet as useExportEvmWallet } from "https://esm.sh/@privy-io/react-auth@2.25.0?deps=react@18.3.1,react-dom@18.3.1";
+  import { PrivyProvider, usePrivy, useLoginWithEmail } from "https://esm.sh/@privy-io/react-auth@2.25.0?deps=react@18.3.1,react-dom@18.3.1";
   import { useExportWallet } from "https://esm.sh/@privy-io/react-auth@2.25.0/solana?deps=react@18.3.1,react-dom@18.3.1";
 
   const h = React.createElement;
@@ -78,10 +78,11 @@
   // dialog loses its CSS through CDN bundling; the broken layout stacked the
   // submit button over the email input and swallowed every tap.)
   function App() {
-    const { ready, authenticated, user, logout } = usePrivy();
+    // usePrivy's exportWallet is the ETHEREUM exporter; the /solana subpath
+    // hook is the Solana one (v2 keeps them separate).
+    const { ready, authenticated, user, logout, exportWallet: exportEvmWallet } = usePrivy();
     const { sendCode, loginWithCode } = useLoginWithEmail();
     const { exportWallet } = useExportWallet();
-    const { exportWallet: exportEvmWallet } = useExportEvmWallet();
 
     const [stage, setStage] = React.useState("email"); // email | code
     // The app deep-links here with ?email= so people land on THEIR account
