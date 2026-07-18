@@ -1,0 +1,22 @@
+:root { color-scheme: light; }
+* { box-sizing: border-box; margin: 0; }
+body {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  background: #FFFFFF; color: #14181D;
+  line-height: 1.6; padding: 48px 24px 96px;
+}
+main { max-width: 680px; margin: 0 auto; }
+.brand { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: #696D77; font-weight: 600; }
+h1 { font-size: 28px; letter-spacing: -0.03em; margin: 10px 0 4px; }
+.updated { font-size: 13px; color: #696D77; margin-bottom: 28px; }
+h2 { font-size: 18px; letter-spacing: -0.02em; margin: 30px 0 8px; }
+p, li { font-size: 15px; color: #4B4F55; }
+ul { padding-left: 22px; margin: 8px 0; }
+li { margin: 4px 0; }
+b { color: #14181D; font-weight: 600; }
+a { color: #1F5841; }
+.note {
+  background: #F0F1F5; border-radius: 14px; padding: 14px 16px;
+  font-size: 13.5px; color: #4B4F55; margin: 22px 0;
+}
+footer { margin-top: 44px; font-size: 13px; color: #696D77; }

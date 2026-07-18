@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Stable — Privacy Policy</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<main>
+  <div class="brand">Stable</div>
+  <h1>Privacy Policy</h1>
+  <div class="updated">Last updated: July 17, 2026</div>
+
+  <p>Stable is a self-custodial money app. This policy explains what information we
+  handle, why, and what we never touch. The short version: <b>we hold as little as
+  possible, we never sell your data, and your money is controlled by keys only you
+  hold.</b></p>
+
+  <h2>What we collect</h2>
+  <ul>
+    <li><b>Account basics.</b> Your email address (used to sign in), your @username,
+    an optional display photo, and an optional phone number if you add one.</li>
+    <li><b>Wallet addresses.</b> The public addresses of the self-custodial wallets
+    created for your account. Public addresses are not secrets — they're how people
+    send you money.</li>
+    <li><b>Transaction records.</b> A mirror of your on-chain activity (amounts,
+    counterparties, optional notes you attach) so your feed loads instantly. The
+    blockchain itself remains the source of truth and is public by design.</li>
+    <li><b>Social graph.</b> Friends you add, requests you send and receive, and
+    accounts you block.</li>
+  </ul>
+
+  <h2>What we never have</h2>
+  <ul>
+    <li><b>Your private keys.</b> Wallets are created and secured by our
+    authentication partner (Privy) so that only you can authorize spending. Stable
+    cannot move, freeze, or lose your money.</li>
+    <li><b>Your Face ID or biometrics.</b> Face ID checks happen entirely on your
+    device through Apple's APIs. Biometric data never leaves your phone.</li>
+    <li><b>Bank logins or card numbers</b> (until such features launch, at which
+    point they will be handled by regulated partners, not stored by Stable).</li>
+  </ul>
+
+  <h2>Device permissions</h2>
+  <ul>
+    <li><b>Camera / photo library</b> — only when you choose to set a profile
+    photo. Photos you pick are compressed and stored as your avatar; we can't
+    browse your library.</li>
+    <li><b>Face ID</b> — to confirm payments locally on your device.</li>
+  </ul>
+
+  <h2>Who we share with (service providers)</h2>
+  <p>We use a small set of infrastructure providers, each receiving only what
+  their function requires:</p>
+  <ul>
+    <li><b>Privy</b> (a Stripe company) — sign-in, one-time code emails, and
+    self-custodial wallet infrastructure. They process your email address.</li>
+    <li><b>Supabase</b> — hosts our application database (the account basics and
+    transaction mirror above).</li>
+    <li><b>Circle</b> — powers cross-chain USDC transfers (CCTP). They see the
+    public on-chain transactions involved.</li>
+    <li><b>Helius</b> and public blockchain RPCs — read and relay public
+    blockchain data.</li>
+  </ul>
+  <p><b>We do not sell your personal information. We do not run ads. We do not
+  share your data with data brokers.</b></p>
+
+  <h2>The blockchain is public</h2>
+  <p>Payments on Stable settle on public blockchains. Anyone can see transactions
+  between wallet addresses, though those addresses are not labeled with your name
+  by us. Deleting your Stable account removes our records, but on-chain history is
+  permanent by the nature of blockchains.</p>
+
+  <h2>Data retention &amp; deletion</h2>
+  <p>You can delete your account in Settings → Security. That removes your
+  profile (email, username, photo, phone, social graph) from our systems. Your
+  wallet remains yours — you can export your recovery key before deleting and
+  keep full access to your funds without Stable.</p>
+
+  <h2>Security</h2>
+  <p>All traffic is encrypted in transit. Spending requires your device's
+  signature — our servers verify and co-sign transactions but cannot initiate
+  them. Keys are secured in hardware-backed enclaves managed by Privy.</p>
+
+  <h2>Children</h2>
+  <p>Stable is not directed at children under 13 (or the applicable minimum age
+  in your region), and we don't knowingly collect their data.</p>
+
+  <h2>Changes</h2>
+  <p>If this policy changes materially, we'll notify you in the app before the
+  change takes effect.</p>
+
+  <h2>Contact</h2>
+  <p>Questions? Email <a href="mailto:j.faraone21@gmail.com">j.faraone21@gmail.com</a>.</p>
+
+  <div class="note">Stable is in early testing. This policy will be reviewed by
+  counsel and may be updated before general availability.</div>
+
+  <footer>© 2026 Stable · <a href="terms.html">Terms of Service</a></footer>
+</main>
+</body>
+</html>
