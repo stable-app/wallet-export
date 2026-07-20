@@ -10,7 +10,7 @@
 <main>
   <div class="brand">Stable</div>
   <h1>Terms of Service</h1>
-  <div class="updated">Last updated: July 17, 2026</div>
+  <div class="updated">Last updated: July 20, 2026</div>
 
   <p>These terms govern your use of the Stable app. By creating an account you
   agree to them. The plain-English summary sits beside each section — the short
@@ -35,6 +35,9 @@
     account is secured.</li>
     <li>You must be at least 18 (or the age of majority where you live) and use
     Stable only for yourself, not on behalf of others.</li>
+    <!-- DRAFT: pending counsel review -->
+    <li>At launch, Stable is available to <b>United States residents only</b>.
+    We may expand to other regions later.</li>
     <li>One account per person. Usernames are first-come, first-served and may
     be reclaimed if impersonating someone.</li>
   </ul>
@@ -60,38 +63,106 @@
 
   <h2>5. Fees</h2>
   <ul>
-    <li>Sending to other Stable users is free. Network/delivery fees for
-    cross-chain transfers are shown in the app before you confirm — what you see
-    is what you pay.</li>
+    <li>Sending to other Stable users is free. Fees for cross-chain transfers
+    are shown in the app before you confirm — what you see is what you pay.</li>
     <li>Fees may change; the app always displays the current fee before you
     commit.</li>
+    <!-- DRAFT: pending counsel review -->
+    <li>Cross-chain transfers carry a <b>flat fee paid to Stable</b> — currently
+    $1, or $2 when Ethereum is involved. The fee is included in the transaction
+    you sign and goes to a fee wallet Stable controls. It is our service fee for
+    delivering the transfer, not a charge collected by the blockchain.</li>
+    <!-- DRAFT: pending counsel review -->
+    <li>When USDC arrives at one of your deposit addresses and is moved to your
+    main balance (see Section 6), the same kind of flat fee is included in that
+    transfer. It reimburses the network (gas) costs Stable pays to move the
+    money, and it likewise goes to a Stable-controlled fee wallet.</li>
   </ul>
 
-  <h2>6. Acceptable use</h2>
+  <!-- DRAFT: pending counsel review -->
+  <h2>6. Automatic transfers from your deposit addresses</h2>
+  <ul>
+    <li>Your account includes deposit addresses on Ethereum and other supported
+    networks. By sending USDC to one of them, you instruct the app to
+    <b>automatically move ("sweep") those funds to your Solana wallet</b> so
+    they appear in your balance.</li>
+    <li>These transfers are a <b>standing instruction from you</b>: each one is
+    signed by your own key, on your device, the next time you open the app.
+    Stable cannot move the funds itself — the app only carries out the transfer
+    you authorized by depositing.</li>
+    <li>The flat fee described in Section 5 is included in each of these
+    transfers.</li>
+  </ul>
+
+  <!-- DRAFT: pending counsel review -->
+  <h2>7. USDC and Circle</h2>
+  <ul>
+    <li>The dollars in your balance are <b>USDC</b>, a stablecoin issued by
+    <b>Circle</b> — not by Stable. Circle's own terms govern USDC itself.</li>
+    <li>Like every USDC holder, you are exposed to the issuer: under legal
+    process (such as a court order or a sanctions requirement), <b>Circle can
+    freeze or block USDC at the token level</b>, including in self-custodial
+    wallets.</li>
+    <li>That power belongs to Circle alone. <b>Stable holds no keys and cannot
+    move, freeze, or seize your funds</b> — the most we can ever do is decline
+    to provide service.</li>
+  </ul>
+
+  <h2>8. Acceptable use</h2>
   <p>Don't use Stable for anything unlawful — including sanctions evasion,
   money laundering, fraud, or purchasing illegal goods. Don't attempt to
   disrupt the service, probe its infrastructure, or access other users'
   accounts. We may suspend app access (never your funds — we can't touch
   those) for violations.</p>
 
-  <h2>7. Testing period</h2>
+  <!-- DRAFT: pending counsel review -->
+  <h2>9. Sanctions &amp; compliance</h2>
+  <ul>
+    <li>U.S. sanctions law applies to Stable and to everyone who uses it. We
+    screen the wallet addresses involved in transactions against government
+    sanctions lists, and we check that you're using the app from a supported
+    region.</li>
+    <li>Stable pays the network costs of your transactions. If screening flags
+    a problem, or the law requires it, we may <b>withhold that sponsorship and
+    refuse to process transactions or provide service</b>.</li>
+    <li>Refusing service never touches your money. <b>Your funds remain fully
+    yours</b>: you can export your recovery key at any time and keep using your
+    wallet with other software, without Stable.</li>
+  </ul>
+
+  <h2>10. Testing period</h2>
   <p>Stable is currently in early testing. Features may change, break, or be
   reset. During test phases, balances may use test networks with no monetary
   value; the app indicates when real money is involved.</p>
 
-  <h2>8. Third-party services</h2>
+  <h2>11. Third-party services</h2>
   <p>Sign-in and wallet infrastructure are provided by Privy; cross-chain
   transfers by Circle's CCTP; blockchain access by public networks. Their
   availability affects the app, and their own terms govern their services.</p>
 
-  <h2>9. Disclaimers &amp; liability</h2>
+  <!-- DRAFT: pending counsel review -->
+  <h2>12. Deleting your account</h2>
+  <ul>
+    <li>You can delete your account in the app. Deletion removes your
+    <b>profile — email, username, photo, friends, and pending requests</b> —
+    from our systems.</li>
+    <li>Some records survive deletion: <b>on-chain history is public and
+    permanent</b> by the nature of blockchains; <b>compliance and screening
+    logs are kept for 10 years</b>, as sanctions rules require; and payments
+    involving other users remain in those users' transaction history (it's
+    their record too), with your side anonymized.</li>
+    <li>Your wallet is yours regardless. Export your recovery key before
+    deleting to keep full access to your funds without Stable.</li>
+  </ul>
+
+  <h2>13. Disclaimers &amp; liability</h2>
   <p>Stable is provided "as is" without warranties. To the maximum extent
   permitted by law, Stable's liability is limited to the amount of fees you
   paid us in the twelve months before a claim. We are not liable for losses
   caused by blockchain networks, third-party services, lost keys, or
   irreversible transactions you authorized.</p>
 
-  <h2>10. Changes &amp; contact</h2>
+  <h2>14. Changes &amp; contact</h2>
   <p>We may update these terms; material changes will be announced in the app.
   Questions: <a href="mailto:support@getstable.money">support@getstable.money</a>.</p>
 

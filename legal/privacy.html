@@ -10,7 +10,7 @@
 <main>
   <div class="brand">Stable</div>
   <h1>Privacy Policy</h1>
-  <div class="updated">Last updated: July 17, 2026</div>
+  <div class="updated">Last updated: July 20, 2026</div>
 
   <p>Stable is a self-custodial money app. This policy explains what information we
   handle, why, and what we never touch. The short version: <b>we hold as little as
@@ -62,21 +62,59 @@
     public on-chain transactions involved.</li>
     <li><b>Helius</b> and public blockchain RPCs — read and relay public
     blockchain data.</li>
+    <!-- DRAFT: pending counsel review -->
+    <li><b>Chainalysis</b> — sanctions screening. They receive the wallet
+    addresses being checked, never your name or email.</li>
+    <!-- DRAFT: pending counsel review -->
+    <li><b>ipapi.co</b> — turns your IP address into a country for the region
+    check described below.</li>
+    <!-- DRAFT: pending counsel review -->
+    <li><b>MoonPay</b> (through Privy) — processes card and bank payments when
+    you add money. They collect the identity details their regulated service
+    requires, under their own privacy policy.</li>
   </ul>
   <p><b>We do not sell your personal information. We do not run ads. We do not
   share your data with data brokers.</b></p>
 
+  <!-- DRAFT: pending counsel review -->
+  <h2>Sanctions screening &amp; region checks</h2>
+  <ul>
+    <li><b>Counterparty screening.</b> When money moves in or out of your
+    account, the wallet addresses involved are checked against government
+    sanctions lists. Only the public addresses are checked — screening never
+    includes your name or email.</li>
+    <li><b>Region checks.</b> We use your IP address to confirm you're in a
+    region where Stable is available. We cache the resulting country (not your
+    browsing activity) for up to 30 days so we don't look it up on every
+    request.</li>
+    <li><b>Compliance logs.</b> Records of these checks are kept for
+    <b>10 years</b>, as sanctions rules require — including after account
+    deletion.</li>
+  </ul>
+
   <h2>The blockchain is public</h2>
   <p>Payments on Stable settle on public blockchains. Anyone can see transactions
   between wallet addresses, though those addresses are not labeled with your name
-  by us. Deleting your Stable account removes our records, but on-chain history is
-  permanent by the nature of blockchains.</p>
+  by us. Deleting your Stable account removes your profile from our systems (see
+  "Data retention &amp; deletion" below), but on-chain history is permanent by
+  the nature of blockchains.</p>
 
   <h2>Data retention &amp; deletion</h2>
   <p>You can delete your account in Settings → Security. That removes your
   profile (email, username, photo, phone, social graph) from our systems. Your
   wallet remains yours — you can export your recovery key before deleting and
   keep full access to your funds without Stable.</p>
+  <!-- DRAFT: pending counsel review -->
+  <p>A few things survive deletion, and we want to be plain about them:</p>
+  <!-- DRAFT: pending counsel review -->
+  <ul>
+    <li><b>On-chain history</b> is public and permanent by the nature of
+    blockchains — no one, including Stable, can erase it.</li>
+    <li><b>Compliance and screening logs</b> are kept for 10 years, as
+    sanctions rules require.</li>
+    <li><b>Payments involving other users</b> stay in those users' transaction
+    history — it's their record too — with your side anonymized.</li>
+  </ul>
 
   <h2>Security</h2>
   <p>All traffic is encrypted in transit. Spending requires your device's
