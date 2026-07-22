@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Stable — Recovery key</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+    background: #FFFFFF; color: #14181D;
+    display: flex; min-height: 100dvh; align-items: flex-start; justify-content: center;
+    padding: 48px 24px 24px;
+  }
+  .card { width: 100%; max-width: 360px; text-align: center; }
+  .brand { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: #696D77; font-weight: 600; }
+  h1 { font-size: 24px; letter-spacing: -0.03em; margin: 10px 0 8px; }
+  p.desc { font-size: 14px; line-height: 1.5; color: #4B4F55; }
+  input {
+    margin-top: 20px; width: 100%; padding: 14px 16px; font-size: 16px;
+    border: 1px solid rgba(20,24,29,0.14); border-radius: 14px; outline: none;
+    background: #F0F1F5; color: #14181D; text-align: center;
+    -webkit-appearance: none; appearance: none;
+  }
+  input:focus { border-color: #14181D; background: #FFFFFF; }
+  input.code { letter-spacing: 0.4em; font-size: 22px; font-weight: 600; }
+  button {
+    margin-top: 14px; width: 100%; padding: 17px 0; border: 0; border-radius: 22px;
+    background: #14181D; color: #fff; font-size: 17px; font-weight: 600;
+    letter-spacing: -0.02em; cursor: pointer;
+  }
+  button:disabled { opacity: 0.4; }
+  button.reveal { background: #1F5841; }
+  .status { margin-top: 14px; font-size: 13px; color: #696D77; min-height: 18px; }
+  .ok { color: #1F5841; }
+  .err { color: #C24A3D; }
+  .warn { font-size: 12.5px; color: #696D77; margin-top: 18px; line-height: 1.5; }
+  .legend { margin-top: 18px; text-align: left; background: #F0F1F5; border-radius: 14px; padding: 14px 16px; }
+  .legend p { font-size: 13px; line-height: 1.5; color: #4B4F55; }
+  .legend p + p { margin-top: 8px; }
+  .legend b { color: #14181D; font-weight: 600; }
+  .link { margin-top: 12px; background: none; border: none; color: #696D77; font-size: 13px; text-decoration: underline; width: auto; padding: 4px; }
+  .sub { margin-top: 26px; padding-top: 20px; border-top: 1px solid rgba(20,24,29,0.08); text-align: left; }
+  .subhead { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+  .subdesc { font-size: 12.5px; line-height: 1.5; color: #696D77; margin-top: 4px; }
+  button.ghost {
+    margin-top: 12px; background: #FFFFFF; color: #14181D;
+    border: 1px solid rgba(20,24,29,0.16); padding: 13px 0; font-size: 15px; border-radius: 18px;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">Stable</div>
+  <h1>Recovery key</h1>
+  <div id="root"><p class="desc">Loading…</p></div>
+</div>
+<script type="module">
+  import React from "https://esm.sh/react@18.3.1";
+  import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
+  // PINNED — an unpinned @2 drifts with esm.sh rebuilds.
+  import { PrivyProvider, usePrivy, useLoginWithEmail } from "https://esm.sh/@privy-io/react-auth@2.25.0?deps=react@18.3.1,react-dom@18.3.1";
+  import { useExportWallet } from "https://esm.sh/@privy-io/react-auth@2.25.0/solana?deps=react@18.3.1,react-dom@18.3.1";
+
+  const h = React.createElement;
+
+  /** The user's embedded wallet on a chain, or null. */
+  const embeddedWallet = (user, chainType) =>
+    (user?.linkedAccounts ?? []).find(
+      (a) =>
+        a.type === "wallet" &&
+        a.chainType === chainType &&
+        (a.walletClientType === "privy" || a.connectorType === "embedded")
+    ) ?? null;
+
+  // Headless email login — OUR fields, no Privy modal. (Privy's prebuilt
+  // dialog loses its CSS through CDN bundling; the broken layout stacked the
+  // submit button over the email input and swallowed every tap.)
+  function App() {
+    // usePrivy's exportWallet is the ETHEREUM exporter; the /solana subpath
+    // hook is the Solana one (v2 keeps them separate).
+    const { ready, authenticated, user, logout, exportWallet: exportEvmWallet } = usePrivy();
+    const { sendCode, loginWithCode } = useLoginWithEmail();
+    const { exportWallet } = useExportWallet();
+
+    const [stage, setStage] = React.useState("email"); // email | code
+    // The app deep-links here with ?email= so people land on THEIR account
+    // (a typo'd or outdated email signs into a fresh, walletless one).
+    const [email, setEmail] = React.useState(
+      () => new URLSearchParams(location.search).get("email") ?? ""
+    );
+    const [code, setCode] = React.useState("");
+    const [busy, setBusy] = React.useState(false);
+    const [status, setStatus] = React.useState(["", ""]); // [text, class]
+
+    if (!ready) return h("p", { className: "desc" }, "Loading…");
+
+    if (authenticated) {
+      const addr = user?.email?.address ?? email;
+      const solWallet = embeddedWallet(user, "solana");
+      const evmWallet = embeddedWallet(user, "ethereum");
+
+      // Signed into an account with no Stable wallet — almost always a
+      // typo'd or outdated email. Say so plainly instead of failing at the
+      // last step with a cryptic library error.
+      if (!solWallet) {
+        return h(React.Fragment, null,
+          h("p", { className: "desc" }, `Signed in as ${addr}.`),
+          h("div", { className: "legend" },
+            h("p", null, h("b", null, "This email isn’t connected to a Stable wallet."), " Your money is safe — it lives under the email you use in the Stable app."),
+            h("p", null, "Check Settings → Personal info in Stable for the exact email, then sign in here with that one.")),
+          h("button", {
+            onClick: () => logout().then(() => { setStage("email"); setCode(""); setStatus(["", ""]); }),
+          }, "Try a different email"),
+          h("p", { className: "warn" },
+            "Never share your recovery key. Anyone who has it can spend your money. Stable will never ask for it.")
+        );
+      }
+
+      return h(React.Fragment, null,
+        h("p", { className: "desc" }, addr ? `Signed in as ${addr}.` : "Signed in."),
+        h("div", { className: "legend" },
+          h("p", null, h("b", null, "\u201cCopy key\u201d"), " (green) copies your private key \u2014 the secret. That\u2019s the one to save."),
+          h("p", null, h("b", null, "\u201cYour wallet\u201d"), " is just your address \u2014 safe to share, not your key.")),
+        h("button", {
+          className: "reveal",
+          disabled: busy,
+          onClick: async () => {
+            setBusy(true); setStatus(["", ""]);
+            try {
+              await exportWallet({ address: solWallet.address });
+              setStatus(["Done — you can close this page.", "ok"]);
+            } catch (e) {
+              setStatus(["Couldn't reveal: " + String(e?.message ?? e).slice(0, 140), "err"]);
+            } finally { setBusy(false); }
+          },
+        }, busy ? "Opening…" : "Reveal private key"),
+        h("div", { className: "status " + status[1] }, status[0]),
+        // Deposit-address key (Ethereum-style networks) — a doorway wallet
+        // that normally holds nothing; the section exists only for users who
+        // have one, so today's Solana-only accounts see no change.
+        evmWallet
+          ? h("div", { className: "sub" },
+              h("p", { className: "subhead" }, "Deposit address key"),
+              h("p", { className: "subdesc" },
+                "Only needed to recover funds stuck on an Ethereum-style network (Base, Ethereum, Arbitrum…). Your balance doesn’t live there."),
+              h("button", {
+                className: "ghost",
+                disabled: busy,
+                onClick: async () => {
+                  setBusy(true); setStatus(["", ""]);
+                  try {
+                    await exportEvmWallet({ address: evmWallet.address });
+                    setStatus(["Done — you can close this page.", "ok"]);
+                  } catch (e) {
+                    setStatus(["Couldn't reveal: " + String(e?.message ?? e).slice(0, 140), "err"]);
+                  } finally { setBusy(false); }
+                },
+              }, "Reveal deposit key"))
+          : null,
+        h("button", {
+          className: "link",
+          onClick: () => logout().then(() => { setStage("email"); setCode(""); setStatus(["", ""]); }),
+        }, "Sign out"),
+        h("p", { className: "warn" },
+          "Never share your recovery key. Anyone who has it can spend your money. Stable will never ask for it.")
+      );
+    }
+
+    if (stage === "code") {
+      return h(React.Fragment, null,
+        h("p", { className: "desc" }, `We sent a 6-digit code to ${email}. Check spam too.`),
+        h("input", {
+          className: "code", inputMode: "numeric", autoComplete: "one-time-code",
+          maxLength: 6, placeholder: "······", value: code, autoFocus: true,
+          onChange: (e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6)),
+        }),
+        h("button", {
+          disabled: busy || code.length !== 6,
+          onClick: async () => {
+            setBusy(true); setStatus(["", ""]);
+            try {
+              await loginWithCode({ code, email });
+              // authenticated flips via usePrivy on success.
+            } catch (e) {
+              setStatus(["That code didn't match. Try again or resend.", "err"]);
+              setCode("");
+            } finally { setBusy(false); }
+          },
+        }, busy ? "Checking…" : "Verify"),
+        h("div", { className: "status " + status[1] }, status[0]),
+        h("button", {
+          className: "link",
+          onClick: () => { setStatus(["Sent — check your inbox.", "ok"]); sendCode({ email }).catch(() => {}); },
+        }, "Resend code"),
+        h("button", {
+          className: "link",
+          onClick: () => { setStage("email"); setCode(""); setStatus(["", ""]); },
+        }, "Different email")
+      );
+    }
+
+    return h(React.Fragment, null,
+      h("p", { className: "desc" },
+        "Sign in with the same email you use in Stable, then reveal your wallet's private key. It appears in Privy's secure window — Stable never sees it."),
+      h("input", {
+        type: "email", inputMode: "email", autoComplete: "email",
+        placeholder: "you@example.com", value: email, autoCapitalize: "none",
+        onChange: (e) => setEmail(e.target.value.trim()),
+      }),
+      h("button", {
+        disabled: busy || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+        onClick: async () => {
+          setBusy(true); setStatus(["", ""]);
+          try {
+            await sendCode({ email });
+            setStage("code");
+          } catch (e) {
+            setStatus(["Couldn't send the code: " + String(e?.message ?? e).slice(0, 120), "err"]);
+          } finally { setBusy(false); }
+        },
+      }, busy ? "Sending…" : "Send code"),
+      h("div", { className: "status " + status[1] }, status[0]),
+      h("p", { className: "warn" },
+        "Never share your recovery key. Anyone who has it can spend your money. Stable will never ask for it.")
+    );
+  }
+
+  createRoot(document.getElementById("root")).render(
+    h(PrivyProvider, { appId: "cmrmljdzy000l0cjvz7n3uyhc", config: { appearance: { theme: "light", accentColor: "#1F5841" } } }, h(App))
+  );
+</script>
+</body>
+</html>
